@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Add a place — Refashion BXL</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="page-contribute">
+
+<nav class="topbar">
+  <div class="logo"><span class="dot"></span>Refashion BXL</div>
+  <div class="nav-links">
+    <a href="landing-page.html" data-i18n="nav_home">Home</a>
+    <a href="about.html" data-i18n="nav_about">About</a>
+    <a href="my-refashion.html">My Refashion BXL</a>
+    <a href="contribute.html" class="active" data-i18n="nav_add">Add a place</a>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px;" id="accountArea">
+    <select id="langSelect">
+      <option value="en">EN</option>
+      <option value="fr">FR</option>
+      <option value="nl">NL</option>
+    </select>
+    <button class="account-btn" id="navLoginBtn" data-i18n="nav_login">Log in</button>
+  </div>
+</nav>
+
+<main>
+  <h1 class="page-title" data-i18n="contrib_title">Add a place to the map</h1>
+  <p class="lead" data-i18n="contrib_lead">Know a circular-fashion place that should be on the map? Share the details with us.</p>
+  <p class="info-note" data-i18n="contrib_info">Every suggestion is reviewed before being added to the Refashion BXL map.</p>
+
+  <form id="contribForm">
+    <div class="field"><label data-i18n="contrib_place_name">Name of the place</label><input type="text" id="pName" required></div>
+
+    <div class="row2">
+      <div class="field">
+        <label data-i18n="contrib_category">Category</label>
+        <select id="pCategory">
+          <option value="repair" data-i18n="cat_repair">Repairs</option>
+          <option value="second" data-i18n="cat_second">Second-hand</option>
+          <option value="donate" data-i18n="cat_donate">Donation</option>
+          <option value="upcycle" data-i18n="cat_upcycle">Upcycling</option>
+        </select>
+      </div>
+      <div class="field">
+        <label data-i18n="field_commune">Brussels neighbourhood or commune</label>
+        <select id="pCommune"></select>
+      </div>
+    </div>
+
+    <div class="field"><label data-i18n="field_address">Address</label><input type="text" id="pAddress" required></div>
+    <div class="field"><label data-i18n="field_email">Contributor email address</label><input type="email" id="cEmail" required></div>
+
+    <div class="field">
+      <label><span data-i18n="field_instagram">Instagram link</span> <span class="optional-tag" data-i18n="contrib_optional">(Optional)</span></label>
+      <input type="text" id="pInstagram" placeholder="https://instagram.com/...">
+    </div>
+    <div class="field">
+      <label><span data-i18n="field_website">Website</span> <span class="optional-tag" data-i18n="contrib_optional">(Optional)</span></label>
+      <input type="text" id="pWebsite" placeholder="https://">
+    </div>
+    <div class="field">
+      <label><span data-i18n="field_description">Short description</span> <span class="optional-tag" data-i18n="contrib_optional">(Optional)</span></label>
+      <textarea id="pDescription"></textarea>
+    </div>
+
+    <button type="submit" class="btn-primary" data-i18n="contrib_submit">Send for review</button>
+  </form>
+
+  <div class="thankyou" id="thankyou">
+    <h2 data-i18n="contrib_thanks_title">Thank you!</h2>
+    <p data-i18n="contrib_thanks_1">Your suggestion has been received and will be reviewed before it appears on the map.</p>
+  </div>
+</main>
+
+<footer>
+  <span>Refashion BXL</span>
+  <span>Brussels, 2026</span>
+</footer>
+
+<script src="script.js"></script>
+<script>
+/* ================= PAGE-SPECIFIC: ADD A PLACE ================= */
+
+document.getElementById('pCommune').innerHTML =
+  BRUSSELS_COMMUNES.map(c => `<option>${c}</option>`).join('');
+
+function applyLang(){
+  const dict = pageDict(STRINGS_CONTRIBUTE);
+  document.getElementById('langSelect').value = getLang();
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (dict[key]) el.textContent = dict[key];
+  });
+  document.getElementById('navLoginBtn').textContent = isLoggedIn() ? dict.nav_account : dict.nav_login;
+}
+document.getElementById('langSelect').addEventListener('change', (e) => {
+  localStorage.setItem('refashion_lang', e.target.value);
+  applyLang();
+});
+document.getElementById('navLoginBtn').addEventListener('click', () => {
+  location.href = 'my-refashion.html';
+});
+applyLang();
+track('page_view', {page:'contribute'});
+
+/* Stored in localStorage for now — this is a placeholder for a real backend
+   + moderation queue. Submissions are never shown publicly or added to the
+   map automatically; each one is namespaced under 'refashion_submissions'
+   with status 'pending_review'. */
+document.getElementById('contribForm').addEventListener('submit', function(e){
+  e.preventDefault();
+  const submissions = JSON.parse(localStorage.getItem('refashion_submissions') || '[]');
+  submissions.push({
+    placeName: document.getElementById('pName').value,
+    category: document.getElementById('pCategory').value,
+    commune: document.getElementById('pCommune').value,
+    address: document.getElementById('pAddress').value,
+    contributorEmail: document.getElementById('cEmail').value,
+    instagram: document.getElementById('pInstagram').value,
+    website: document.getElementById('pWebsite').value,
+    description: document.getElementById('pDescription').value,
+    status: 'pending_review',
+    submittedAt: Date.now()
+  });
+  localStorage.setItem('refashion_submissions', JSON.stringify(submissions));
+  track('contribution_submit', {category: document.getElementById('pCategory').value});
+  document.getElementById('contribForm').classList.add('hidden');
+  document.getElementById('thankyou').classList.add('show');
+});
+</script>
+
+</body>
+</html>

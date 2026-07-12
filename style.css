@@ -1,0 +1,264 @@
+/* =====================================================================
+   REFASHION BXL — SHARED STYLESHEET
+   Used by: landing-page.html, about.html, contribute.html, my-refashion.html
+
+   Structure:
+   1. Design tokens (CSS variables)
+   2. Base / reset
+   3. Nav (shared across all pages)
+   4. Shared buttons
+   5. Shared modal system (signup/login/locked/detail all reuse this)
+   6. Shared toast
+   7. Shared footer
+   8. Page-specific sections — each scoped under a body class
+      (.page-landing / .page-about / .page-contribute / .page-myrefashion)
+      so two pages can safely use the same class name (e.g. "main",
+      ".cat-badge") with different sizing without fighting each other.
+   9. Responsive tweaks
+   ===================================================================== */
+
+/* ---------- 1. DESIGN TOKENS ---------- */
+:root{
+  --bg:#FAF8F4; --card:#FFFFFF; --ink:#1E2A26; --ink-soft:#5B6B65; --line:#E7E2D8;
+  --teal:#1F6F5C; --teal-dark:#164F41; --coral:#FF6B4A; --coral-soft:#FFE7E0;
+  --second:#3E7CB1; --donate:#5C8A3A; --upcycle:#C77B2E; --repair:#A34B6F;
+  --radius:14px; --shadow:0 4px 18px rgba(30,42,38,0.07);
+}
+
+/* ---------- 2. BASE / RESET ---------- */
+*{box-sizing:border-box;}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased;}
+h1,h2,h3{font-family:'Sora',sans-serif;}
+a{color:var(--teal);}
+
+/* ---------- 3. NAV (shared) ---------- */
+nav.topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 32px;max-width:1200px;margin:0 auto;flex-wrap:wrap;}
+.logo{font-family:'Sora',sans-serif;font-weight:800;font-size:20px;color:var(--teal-dark);display:flex;align-items:center;gap:8px;}
+.logo .dot{width:9px;height:9px;border-radius:50%;background:var(--coral);display:inline-block;}
+.nav-links{display:flex;align-items:center;gap:22px;flex-wrap:wrap;}
+.nav-links a{font-size:14.5px;font-weight:600;color:var(--ink-soft);text-decoration:none;}
+.nav-links a.active{color:var(--teal-dark);}
+.nav-links a:hover{color:var(--teal-dark);}
+select#langSelect{font-family:'Inter',sans-serif;font-size:13.5px;font-weight:600;padding:7px 10px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer;}
+
+/* Static nav account buttons — used on about / contribute / my-refashion */
+.account-btn{font-family:'Inter',sans-serif;font-weight:700;font-size:14px;padding:9px 18px;border-radius:22px;border:none;background:var(--teal);color:#fff;cursor:pointer;}
+.account-btn:hover{background:var(--teal-dark);}
+
+/* Dynamically-built nav account buttons — used on landing page */
+.account-area{display:flex;align-items:center;gap:10px;}
+.btn-login-nav{font-family:'Inter',sans-serif;font-weight:700;font-size:13.5px;padding:9px 16px;border-radius:22px;border:2px solid var(--teal);background:transparent;color:var(--teal-dark);cursor:pointer;}
+.btn-login-nav:hover{background:var(--teal);color:#fff;}
+.btn-signup-nav{font-family:'Inter',sans-serif;font-weight:700;font-size:13.5px;padding:9px 16px;border-radius:22px;border:none;background:var(--teal);color:#fff;cursor:pointer;}
+.btn-signup-nav:hover{background:var(--teal-dark);}
+
+/* ---------- 4. SHARED BUTTONS ---------- */
+.btn-primary{background:var(--coral);color:#fff;font-weight:700;font-size:14.5px;padding:12px 24px;border-radius:24px;border:none;cursor:pointer;}
+.btn-primary:hover{background:#E85A3A;}
+.btn-ghost{background:transparent;color:var(--teal-dark);font-weight:700;font-size:14.5px;padding:12px 24px;border-radius:24px;border:2px solid var(--teal);cursor:pointer;}
+.btn-ghost:hover{background:var(--teal);color:#fff;}
+
+/* ---------- 5. SHARED MODAL SYSTEM ---------- */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(30,42,38,0.5);z-index:1000;align-items:center;justify-content:center;padding:20px;}
+.modal-overlay.open{display:flex;}
+.modal-card{background:#fff;max-width:440px;width:100%;border-radius:16px;padding:32px 28px 28px;position:relative;max-height:90vh;overflow-y:auto;}
+.modal-close{position:absolute;top:14px;right:16px;background:none;border:none;font-size:24px;color:var(--ink-soft);cursor:pointer;}
+.modal-eyebrow{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--coral);margin-bottom:8px;}
+.modal-title{font-size:21px;font-weight:800;margin:0 0 12px;color:var(--teal-dark);}
+.modal-text{font-size:14.5px;line-height:1.6;color:var(--ink-soft);margin:0 0 20px;}
+.modal-btns{display:flex;flex-direction:column;gap:10px;}
+.modal-field{margin-bottom:14px;position:relative;}
+.modal-field label{display:block;font-size:12.5px;font-weight:600;margin-bottom:5px;color:var(--ink);}
+.modal-field input, .modal-field select{width:100%;padding:10px 12px;border-radius:8px;border:1px solid var(--line);font-family:'Inter',sans-serif;font-size:14px;}
+.modal-field input.error, .modal-field select.error{border-color:var(--coral);}
+.field-error{font-size:12px;color:var(--coral);margin-top:4px;display:none;}
+.field-error.show{display:block;}
+.pw-toggle{position:absolute;right:12px;top:33px;font-size:11.5px;font-weight:700;color:var(--teal);background:none;border:none;cursor:pointer;}
+.checkbox-row{display:flex;align-items:flex-start;gap:8px;font-size:12.5px;color:var(--ink-soft);margin-bottom:16px;}
+.checkbox-row input{margin-top:2px;}
+.modal-link-row{text-align:center;font-size:13px;margin-top:14px;color:var(--ink-soft);}
+.modal-link-row a{color:var(--teal);font-weight:600;cursor:pointer;}
+.detail-row{display:flex;gap:10px;font-size:13.5px;color:var(--ink);margin-bottom:8px;}
+.detail-row strong{min-width:90px;color:var(--ink-soft);font-weight:600;}
+
+/* ---------- 6. SHARED TOAST ---------- */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--teal-dark);color:#fff;padding:12px 22px;border-radius:24px;font-size:13.5px;font-weight:600;z-index:2000;display:none;}
+
+/* ---------- 7. SHARED FOOTER ---------- */
+footer{max-width:1200px;margin:0 auto;padding:24px 32px 40px;font-size:12.5px;color:var(--ink-soft);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+footer a{color:var(--ink-soft);text-decoration:none;font-weight:600;}
+footer a:hover{color:var(--teal-dark);}
+.footer-links{display:flex;gap:16px;}
+
+
+/* =====================================================================
+   8. PAGE-SPECIFIC SECTIONS
+   ===================================================================== */
+
+/* ---------- 8a. LANDING PAGE ---------- */
+.page-landing header.hero{max-width:1200px;margin:0 auto;padding:36px 32px 30px;}
+.page-landing .tagline{font-family:'IBM Plex Mono',monospace;font-size:12.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--coral);font-weight:700;margin-bottom:10px;}
+.page-landing h1.title{font-size:clamp(34px,5vw,54px);font-weight:800;color:var(--teal-dark);margin:0 0 16px;line-height:1.05;}
+.page-landing p.hero-text{font-size:16.5px;line-height:1.65;color:var(--ink-soft);max-width:700px;margin:0 0 26px;}
+
+.page-landing section.filters{max-width:1200px;margin:0 auto;padding:0 32px 20px;display:flex;flex-direction:column;gap:14px;}
+.page-landing .search-row{display:flex;gap:12px;flex-wrap:wrap;}
+.page-landing #searchInput{flex:1;min-width:200px;font-family:'Inter',sans-serif;font-size:14px;padding:11px 16px;border-radius:22px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);}
+.page-landing .filter-row{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;}
+.page-landing .chip-row{display:flex;gap:10px;flex-wrap:wrap;}
+.page-landing .chip{font-size:13.5px;font-weight:600;padding:9px 16px;border-radius:20px;border:1.5px solid var(--line);background:var(--card);color:var(--ink-soft);cursor:pointer;transition:all .15s ease;}
+.page-landing .chip[data-cat="second"].active{background:var(--second);border-color:var(--second);color:#fff;}
+.page-landing .chip[data-cat="donate"].active{background:var(--donate);border-color:var(--donate);color:#fff;}
+.page-landing .chip[data-cat="upcycle"].active{background:var(--upcycle);border-color:var(--upcycle);color:#fff;}
+.page-landing .chip[data-cat="repair"].active{background:var(--repair);border-color:var(--repair);color:#fff;}
+.page-landing .chip[data-cat="all"].active{background:var(--ink);border-color:var(--ink);color:#fff;}
+.page-landing select#neighFilter{font-family:'Inter',sans-serif;font-size:13.5px;font-weight:600;padding:9px 14px;border-radius:20px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer;max-width:220px;}
+
+.page-landing section.map-wrap{max-width:1200px;margin:0 auto;padding:0 32px 30px;}
+.page-landing #map{width:100%;height:420px;border-radius:var(--radius);border:1px solid var(--line);}
+.page-landing .legend{display:flex;gap:16px;flex-wrap:wrap;margin-top:10px;font-size:12px;color:var(--ink-soft);}
+.page-landing .legend-item{display:flex;align-items:center;gap:6px;}
+.page-landing .legend-dot{width:10px;height:10px;border-radius:50%;display:inline-block;}
+
+.page-landing section.grid-wrap{max-width:1200px;margin:0 auto;padding:10px 32px 60px;}
+.page-landing .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:18px;}
+.page-landing .card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px 18px 16px;cursor:pointer;position:relative;transition:transform .15s ease;}
+.page-landing .card:hover{transform:translateY(-3px);}
+.page-landing .fav-btn{position:absolute;top:14px;right:14px;background:none;border:none;cursor:pointer;padding:2px;z-index:2;}
+.page-landing .fav-btn svg{width:20px;height:20px;stroke:var(--ink-soft);fill:none;stroke-width:1.8;transition:all .15s ease;}
+.page-landing .fav-btn.saved svg{fill:var(--coral);stroke:var(--coral);}
+.page-landing .cat-badge{display:inline-block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;padding:4px 10px;border-radius:12px;margin-bottom:10px;}
+.page-landing .cat-badge.second{background:#E4EEF7;color:var(--second);}
+.page-landing .cat-badge.donate{background:#EBF2E3;color:var(--donate);}
+.page-landing .cat-badge.upcycle{background:#FBEADA;color:var(--upcycle);}
+.page-landing .cat-badge.repair{background:#F3E1EA;color:var(--repair);}
+.page-landing .card-name{font-size:16px;font-weight:700;margin:0 0 4px;padding-right:26px;}
+.page-landing .card-neigh{font-size:13px;color:var(--ink-soft);margin:0 0 14px;}
+.page-landing .card-links{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.page-landing .icon-link{display:flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;background:var(--bg);color:var(--ink-soft);text-decoration:none;}
+.page-landing .icon-link:hover{background:var(--line);}
+.page-landing .icon-link svg{width:15px;height:15px;}
+.page-landing .view-details{font-size:12.5px;font-weight:700;color:var(--teal);background:none;border:none;cursor:pointer;padding:0;}
+
+.page-landing section.contact{max-width:1200px;margin:0 auto;padding:20px 32px 60px;border-top:1px solid var(--line);}
+.page-landing .contact-box{background:var(--coral-soft);border-radius:20px;padding:34px 36px;max-width:640px;margin-top:30px;}
+.page-landing .contact-title{font-size:22px;font-weight:800;color:var(--teal-dark);margin:0 0 10px;}
+.page-landing .contact-text{font-size:14.5px;line-height:1.6;color:var(--ink);}
+.page-landing .contact-text a{color:var(--coral);font-weight:700;}
+
+.page-landing section.teaser{max-width:1200px;margin:0 auto;padding:30px 32px;border-top:1px solid var(--line);}
+.page-landing .teaser-inner{display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap;}
+.page-landing .teaser-title{font-size:20px;font-weight:800;color:var(--teal-dark);margin:0 0 6px;}
+.page-landing .teaser-text{font-size:13.5px;line-height:1.5;color:var(--ink-soft);max-width:560px;margin:0;}
+
+/* ---------- 8b. ABOUT PAGE ---------- */
+.page-about main{max-width:760px;margin:0 auto;padding:50px 32px 80px;}
+.page-about .eyebrow{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--coral);margin-bottom:12px;}
+.page-about h1.page-title{font-size:clamp(30px,4.5vw,44px);font-weight:800;color:var(--teal-dark);margin:0 0 26px;line-height:1.1;}
+.page-about .lead{font-size:18px;line-height:1.6;color:var(--ink);margin:0 0 28px;font-weight:500;}
+.page-about p{font-size:15.5px;line-height:1.75;color:var(--ink-soft);margin:0 0 20px;}
+.page-about h2.sub{font-size:20px;font-weight:700;color:var(--teal-dark);margin:36px 0 12px;}
+.page-about .cta-box{background:var(--coral-soft);border-radius:16px;padding:26px 28px;margin-top:36px;}
+.page-about .cta-box p{color:var(--ink);margin-bottom:16px;}
+.page-about .btn-primary{text-decoration:none;display:inline-block;}
+
+/* ---------- 8c. ADD A PLACE (contribute) PAGE ---------- */
+.page-contribute main{max-width:620px;margin:0 auto;padding:44px 32px 80px;}
+.page-contribute .eyebrow{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--coral);margin-bottom:12px;}
+.page-contribute h1.page-title{font-size:clamp(28px,4vw,38px);font-weight:800;color:var(--teal-dark);margin:0 0 12px;line-height:1.1;}
+.page-contribute p.lead{font-size:15px;line-height:1.6;color:var(--ink-soft);margin:0 0 30px;}
+.page-contribute form{background:var(--card);border-radius:18px;padding:30px 28px;box-shadow:0 4px 18px rgba(30,42,38,0.07);}
+.page-contribute fieldset{border:none;padding:0;margin:0 0 26px;}
+.page-contribute legend{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--teal-dark);margin:0 0 14px;padding:0;}
+.page-contribute .field{margin-bottom:16px;}
+.page-contribute .field label{display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:var(--ink);}
+.page-contribute .optional-tag{font-weight:400;font-style:italic;color:var(--ink-soft);font-size:12px;}
+.page-contribute .info-note{font-size:13.5px;color:var(--ink-soft);background:var(--card);border-radius:12px;padding:14px 18px;margin-bottom:22px;}
+.page-contribute .field input, .page-contribute .field select, .page-contribute .field textarea{
+  width:100%;padding:10px 12px;border-radius:8px;border:1px solid var(--line);
+  font-family:'Inter',sans-serif;font-size:14px;background:#fff;color:var(--ink);
+}
+.page-contribute .field textarea{resize:vertical;min-height:80px;}
+.page-contribute .row2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.page-contribute .btn-primary{font-size:15px;padding:13px 26px;width:100%;}
+.page-contribute .thankyou{display:none;background:var(--coral-soft);border-radius:18px;padding:36px 30px;text-align:center;}
+.page-contribute .thankyou.show{display:block;}
+.page-contribute .thankyou h2{font-size:22px;color:var(--teal-dark);margin:0 0 12px;}
+.page-contribute .thankyou p{font-size:14.5px;color:var(--ink);line-height:1.6;margin:0 0 8px;}
+.page-contribute form.hidden{display:none;}
+
+/* ---------- 8d. MY REFASHION BXL PAGE ---------- */
+.page-myrefashion main{max-width:900px;margin:0 auto;padding:44px 32px 80px;}
+.page-myrefashion .loggedout-card{background:var(--coral-soft);border-radius:20px;padding:44px 36px;text-align:center;}
+.page-myrefashion .loggedout-card h1{font-size:26px;color:var(--teal-dark);margin:0 0 10px;}
+.page-myrefashion .loggedout-card p{font-size:14.5px;color:var(--ink);margin:0 0 22px;max-width:440px;margin-left:auto;margin-right:auto;line-height:1.6;}
+.page-myrefashion .loggedout-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+.page-myrefashion .profile-card{background:var(--card);border-radius:16px;box-shadow:var(--shadow);padding:24px 26px;margin-bottom:20px;display:flex;gap:18px;align-items:flex-start;flex-wrap:wrap;}
+.page-myrefashion .avatar-wrap{position:relative;width:72px;height:72px;flex:0 0 auto;}
+.page-myrefashion .avatar{width:72px;height:72px;border-radius:50%;object-fit:cover;background:var(--line);display:block;}
+.page-myrefashion .avatar-edit{position:absolute;bottom:-2px;right:-2px;width:24px;height:24px;border-radius:50%;background:var(--teal);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;cursor:pointer;border:2px solid var(--bg);}
+.page-myrefashion .profile-main{flex:1;min-width:200px;}
+.page-myrefashion .profile-name{font-size:19px;font-weight:700;font-family:'Sora',sans-serif;color:var(--teal-dark);margin:0 0 3px;}
+.page-myrefashion .profile-meta{font-size:13px;color:var(--ink-soft);margin:0 0 8px;}
+.page-myrefashion .profile-bio{font-size:13.5px;color:var(--ink);margin:0;}
+.page-myrefashion .profile-edit-btn{align-self:flex-start;}
+.page-myrefashion .profile-fields{display:flex;flex-direction:column;gap:8px;flex:1;min-width:200px;}
+.page-myrefashion .profile-fields input, .page-myrefashion .profile-fields select, .page-myrefashion .profile-fields textarea{
+  font-family:'Inter',sans-serif;font-size:14px;padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:#fff;
+}
+.page-myrefashion .profile-fields input.name-input{font-size:16px;font-weight:700;font-family:'Sora',sans-serif;color:var(--teal-dark);}
+.page-myrefashion .profile-fields textarea{resize:vertical;min-height:50px;font-family:'Inter',sans-serif;}
+
+.page-myrefashion .summary-row{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:28px;}
+.page-myrefashion .summary-chip{background:var(--card);border-radius:12px;padding:12px 18px;font-size:13.5px;font-weight:600;color:var(--ink);box-shadow:0 2px 8px rgba(30,42,38,0.05);display:flex;align-items:center;gap:8px;}
+.page-myrefashion .summary-chip .num{font-family:'Sora',sans-serif;font-weight:800;color:var(--teal-dark);}
+
+.page-myrefashion h2.section-title{font-size:19px;font-weight:700;color:var(--teal-dark);margin:36px 0 16px;}
+.page-myrefashion .empty-note{font-size:13.5px;color:var(--ink-soft);background:var(--card);border-radius:12px;padding:18px 20px;}
+.page-myrefashion .fav-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px;}
+.page-myrefashion .fav-card{background:var(--card);border-radius:12px;padding:14px 16px;box-shadow:0 3px 12px rgba(30,42,38,0.06);}
+.page-myrefashion .cat-badge{display:inline-block;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;padding:3px 9px;border-radius:10px;margin-bottom:8px;}
+.page-myrefashion .cat-badge.second{background:#E4EEF7;color:var(--second);}
+.page-myrefashion .cat-badge.donate{background:#EBF2E3;color:var(--donate);}
+.page-myrefashion .cat-badge.upcycle{background:#FBEADA;color:var(--upcycle);}
+.page-myrefashion .cat-badge.repair{background:#F3E1EA;color:var(--repair);}
+.page-myrefashion .fav-name{font-size:14.5px;font-weight:700;margin:0 0 4px;}
+.page-myrefashion .fav-addr{font-size:12px;color:var(--ink-soft);margin:0;}
+
+.page-myrefashion .review-card{background:var(--card);border-radius:12px;padding:16px 18px;margin-bottom:10px;box-shadow:0 2px 8px rgba(30,42,38,0.05);}
+.page-myrefashion .review-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+.page-myrefashion .review-shop{font-weight:700;font-size:14.5px;}
+.page-myrefashion .review-stars{color:#E8A93A;font-size:14px;letter-spacing:1px;}
+.page-myrefashion .review-text{font-size:13.5px;color:var(--ink);margin:0 0 4px;line-height:1.5;}
+.page-myrefashion .review-date{font-size:11.5px;color:var(--ink-soft);}
+
+.page-myrefashion .history-list{display:flex;flex-direction:column;gap:10px;}
+.page-myrefashion .history-row{background:var(--card);border-radius:10px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;font-size:13.5px;box-shadow:0 2px 8px rgba(30,42,38,0.05);flex-wrap:wrap;gap:8px;}
+.page-myrefashion .history-row .hname{font-weight:600;}
+.page-myrefashion .history-row .hmeta{color:var(--ink-soft);font-size:12px;}
+.page-myrefashion .history-row .htime{color:var(--ink-soft);font-size:12px;}
+.page-myrefashion .status-badge{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;padding:4px 10px;border-radius:12px;}
+.page-myrefashion .status-badge.pending{background:#E9EEF4;color:#4A6280;}
+.page-myrefashion .status-badge.approved{background:#EBF2E3;color:var(--donate);}
+.page-myrefashion .status-badge.needs_info{background:#FBEADA;color:var(--upcycle);}
+.page-myrefashion .status-badge.rejected{background:#F6DEDC;color:#B3423A;}
+
+.page-myrefashion .settings-card{background:var(--card);border-radius:14px;padding:20px 22px;margin-top:16px;display:flex;flex-direction:column;gap:14px;}
+.page-myrefashion .settings-row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+.page-myrefashion .settings-row label{font-size:13.5px;font-weight:600;color:var(--ink);}
+.page-myrefashion .settings-note{font-size:12px;color:var(--ink-soft);margin:-8px 0 0;}
+.page-myrefashion .logout-row{margin-top:6px;}
+
+
+/* =====================================================================
+   9. RESPONSIVE
+   ===================================================================== */
+@media (max-width:640px){
+  nav.topbar{padding:16px 20px;}
+  .page-landing header.hero{padding:24px 20px 20px;}
+  .page-landing section.filters, .page-landing section.map-wrap, .page-landing section.grid-wrap,
+  .page-landing section.contact{padding-left:20px;padding-right:20px;}
+  .page-about main{padding:36px 20px 60px;}
+  .page-contribute main{padding:30px 20px 60px;}
+  .page-myrefashion main{padding:30px 20px 60px;}
+}
