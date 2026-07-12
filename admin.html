@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — Refashion BXL</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+  /* Admin-only styling, kept separate since this page is not part of the public site design */
+  body.page-admin main{max-width:900px;margin:0 auto;padding:44px 32px 80px;}
+  .page-admin .login-card{max-width:380px;margin:80px auto;background:var(--card);border-radius:16px;box-shadow:var(--shadow);padding:32px 28px;}
+  .page-admin .login-card h1{font-size:20px;color:var(--teal-dark);margin:0 0 18px;}
+  .page-admin .field{margin-bottom:14px;}
+  .page-admin .field label{display:block;font-size:12.5px;font-weight:600;margin-bottom:5px;}
+  .page-admin .field input, .page-admin .field select{width:100%;padding:10px 12px;border-radius:8px;border:1px solid var(--line);font-family:'Inter',sans-serif;font-size:14px;}
+  .page-admin .sub-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;}
+  .page-admin .sub-card{background:var(--card);border-radius:14px;padding:20px 22px;margin-bottom:14px;box-shadow:0 2px 8px rgba(30,42,38,0.05);}
+  .page-admin .sub-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;}
+  .page-admin .sub-name{font-size:16px;font-weight:700;color:var(--teal-dark);}
+  .page-admin .sub-meta{font-size:12.5px;color:var(--ink-soft);margin:4px 0;}
+  .page-admin .sub-desc{font-size:13.5px;color:var(--ink);margin:8px 0;}
+  .page-admin .sub-controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:10px;}
+  .page-admin .latlng-row{display:flex;gap:8px;margin-top:8px;}
+  .page-admin .latlng-row input{width:110px;padding:8px 10px;border-radius:8px;border:1px solid var(--line);font-size:13px;}
+  .page-admin .empty-note{font-size:13.5px;color:var(--ink-soft);background:var(--card);border-radius:12px;padding:18px 20px;}
+  .page-admin .error-text{color:var(--coral);font-size:13px;margin-top:8px;display:none;}
+  .page-admin .error-text.show{display:block;}
+</style>
+</head>
+<body class="page-admin">
+
+<nav class="topbar">
+  <div class="logo"><span class="dot"></span>Refashion BXL <span style="font-size:12px;color:var(--ink-soft);font-weight:600;">— admin</span></div>
+  <div class="nav-links">
+    <a href="landing-page.html">Back to site</a>
+  </div>
+  <div id="accountArea"></div>
+</nav>
+
+<main>
+  <div class="login-card" id="loginCard">
+    <h1>Admin log in</h1>
+    <div class="field"><label>Email</label><input type="email" id="adminEmail"></div>
+    <div class="field"><label>Password</label><input type="password" id="adminPassword"></div>
+    <button class="btn-primary" id="adminLoginBtn" style="width:100%;">Log in</button>
+    <p class="error-text" id="adminLoginError">Incorrect email or password.</p>
+  </div>
+
+  <div id="dashboard" style="display:none;">
+    <div class="sub-row">
+      <h1 class="page-title" style="margin:0;">Submissions</h1>
+      <button class="btn-ghost" id="adminLogoutBtn">Log out</button>
+    </div>
+    <div id="subList"></div>
+  </div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script src="script.js"></script>
+<script>
+/* ================= ADMIN DASHBOARD =================
+   This page is not linked from the public nav on purpose — it's for you
+   only. Real protection comes from Supabase requiring a valid admin
+   login (created in Step 3 of the setup) before any submission data can
+   be read or changed; the row-level security policies on the
+   `submissions` and `places` tables enforce this on the server side,
+   not just in this page's code. */
+
+const sb = getSupabase();
+if (!sb){
+  document.getElementById('loginCard').innerHTML =
+    '<p style="font-size:14px;color:var(--ink);">Supabase isn\'t configured yet — set SUPABASE_URL and SUPABASE_ANON_KEY in script.js first.</p>';
+}
+
+const STATUS_OPTIONS = [
+  {value:'pending', label:'Pending review'},
+  {value:'approved', label:'Approved'},
+  {value:'needs_info', label:'Needs more information'},
+  {value:'rejected', label:'Rejected'}
+];
+const CAT_LABEL = {second:'Second-hand', donate:'Donation', upcycle:'Upcycling', repair:'Repairs'};
+
+async function checkSession(){
+  if (!sb) return;
+  const { data } = await sb.auth.getSession();
+  if (data.session){
+    document.getElementById('loginCard').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'block';
+    loadSubmissions();
+  }
+}
+
+document.getElementById('adminLoginBtn').addEventListener('click', async () => {
+  if (!sb) return;
+  const email = document.getElementById('adminEmail').value.trim();
+  const password = document.getElementById('adminPassword').value;
+  const { error } = await sb.auth.signInWithPassword({email, password});
+  if (error){
+    document.getElementById('adminLoginError').classList.add('show');
+    return;
+  }
+  document.getElementById('adminLoginError').classList.remove('show');
+  document.getElementById('loginCard').style.display = 'none';
+  document.getElementById('dashboard').style.display = 'block';
+  loadSubmissions();
+});
+
+document.getElementById('adminLogoutBtn').addEventListener('click', async () => {
+  if (!sb) return;
+  await sb.auth.signOut();
+  location.reload();
+});
+
+async function loadSubmissions(){
+  const { data, error } = await sb.from('submissions').select('*').order('submitted_at', {ascending:false});
+  const list = document.getElementById('subList');
+  if (error){
+    list.innerHTML = `<div class="empty-note">Could not load submissions: ${error.message}</div>`;
+    return;
+  }
+  if (!data || data.length === 0){
+    list.innerHTML = `<div class="empty-note">No submissions yet.</div>`;
+    return;
+  }
+  list.innerHTML = data.map(s => `
+    <div class="sub-card" data-id="${s.id}">
+      <div class="sub-top">
+        <div>
+          <div class="sub-name">${s.place_name}</div>
+          <div class="sub-meta">${CAT_LABEL[s.category] || s.category} · ${s.commune} · ${s.address}</div>
+          <div class="sub-meta">Submitted by ${s.contributor_email} on ${new Date(s.submitted_at).toLocaleDateString()}</div>
+          ${s.description ? `<p class="sub-desc">${s.description}</p>` : ''}
+          <div class="sub-meta">
+            ${s.instagram ? `<a href="${s.instagram}" target="_blank">Instagram ↗</a>` : ''}
+            ${s.instagram && s.website ? ' · ' : ''}
+            ${s.website ? `<a href="${s.website}" target="_blank">Website ↗</a>` : ''}
+          </div>
+        </div>
+      </div>
+      <div class="sub-controls">
+        <select data-status="${s.id}">
+          ${STATUS_OPTIONS.map(o => `<option value="${o.value}" ${o.value===s.status?'selected':''}>${o.label}</option>`).join('')}
+        </select>
+        <button class="btn-ghost" data-save="${s.id}">Save status</button>
+        <button class="btn-primary" data-publish="${s.id}" ${s.status==='approved' ? '' : 'style="display:none;"'}>Publish to map</button>
+      </div>
+      <div class="latlng-row" data-latlng-row="${s.id}" style="${s.status==='approved' ? '' : 'display:none;'}">
+        <input type="text" placeholder="Latitude" data-lat="${s.id}">
+        <input type="text" placeholder="Longitude" data-lng="${s.id}">
+        <span style="font-size:12px;color:var(--ink-soft);align-self:center;">Find these by right-clicking the spot on Google Maps</span>
+      </div>
+    </div>
+  `).join('');
+
+  list.querySelectorAll('[data-save]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const id = btn.getAttribute('data-save');
+      const status = list.querySelector(`[data-status="${id}"]`).value;
+      const { error } = await sb.from('submissions').update({status}).eq('id', id);
+      if (error){ showToast('Error: ' + error.message); return; }
+      showToast('Status updated');
+      loadSubmissions();
+    });
+  });
+  list.querySelectorAll('[data-status]').forEach(sel => {
+    sel.addEventListener('change', () => {
+      const id = sel.getAttribute('data-status');
+      const showExtra = sel.value === 'approved';
+      list.querySelector(`[data-publish="${id}"]`).style.display = showExtra ? 'inline-block' : 'none';
+      list.querySelector(`[data-latlng-row="${id}"]`).style.display = showExtra ? 'flex' : 'none';
+    });
+  });
+  list.querySelectorAll('[data-publish]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const id = btn.getAttribute('data-publish');
+      const sub = data.find(s => s.id === id);
+      const lat = parseFloat(list.querySelector(`[data-lat="${id}"]`).value);
+      const lng = parseFloat(list.querySelector(`[data-lng="${id}"]`).value);
+      if (isNaN(lat) || isNaN(lng)){
+        showToast('Enter latitude and longitude first');
+        return;
+      }
+      const { error } = await sb.from('places').insert([{
+        id: 'crowd-' + id,
+        name: sub.place_name,
+        cat: sub.category,
+        neigh: sub.commune,
+        addr: sub.address,
+        instagram: sub.instagram || null,
+        website: sub.website || null,
+        lat, lng
+      }]);
+      if (error){ showToast('Error publishing: ' + error.message); return; }
+      showToast('Published to the live map!');
+    });
+  });
+}
+
+checkSession();
+</script>
+
+</body>
+</html>
