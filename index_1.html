@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Refashion BXL — Circular fashion in Brussels</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="page-landing">
+
+<nav class="topbar">
+  <div class="logo"><span class="dot"></span>Refashion BXL</div>
+  <div class="nav-links">
+    <a href="landing-page.html" class="active" data-i18n="nav_home">Home</a>
+    <a href="about.html" data-i18n="nav_about">About</a>
+    <a href="contribute.html" data-i18n="nav_add">Add a place</a>
+    <a href="my-refashion.html">My Refashion BXL</a>
+  </div>
+  <div class="account-area" id="accountArea"></div>
+</nav>
+
+<header class="hero">
+  <div class="tagline" data-i18n="tagline">Refashion BXL — your circular guide to Brussels</div>
+  <h1 class="title">Refashion BXL</h1>
+  <p class="hero-text" data-i18n="hero_text">
+    Four stops in the life of a garment, mapped across Brussels: find a second-hand shop to give a piece its
+    second wardrobe, drop off the clothes you no longer wear so they can start a new journey, discover upcycling
+    workshops that give an old pair of jeans, shirt or jacket a whole new story, or finally repair that bag,
+    zipper or favourite piece you promised yourself you'd fix months ago. Browse by category or explore by
+    neighbourhood and keep your clothes in the loop.
+  </p>
+  <button class="btn-primary" id="browseMapBtn" data-i18n="hero_cta">Browse the map</button>
+</header>
+
+<section class="filters">
+  <div class="search-row">
+    <input type="text" id="searchInput" data-i18n-placeholder="search_placeholder" placeholder="Search a shop or initiative by name…">
+  </div>
+  <div class="filter-row">
+    <div class="chip-row" id="chipRow">
+      <div class="chip active" data-cat="all" data-i18n="chip_all">All</div>
+      <div class="chip" data-cat="second" data-i18n="chip_second">Second-hand</div>
+      <div class="chip" data-cat="donate" data-i18n="chip_donate">Donation</div>
+      <div class="chip" data-cat="upcycle" data-i18n="chip_upcycle">Upcycling</div>
+      <div class="chip" data-cat="repair" data-i18n="chip_repair">Repairs</div>
+    </div>
+    <select id="neighFilter">
+      <option value="all" data-i18n="neigh_all">All communes</option>
+    </select>
+  </div>
+</section>
+
+<section class="map-wrap" id="mapSection">
+  <div id="map"></div>
+  <div class="legend">
+    <div class="legend-item"><span class="legend-dot" style="background:#3E7CB1;"></span><span data-i18n="legend_second">Second-hand</span></div>
+    <div class="legend-item"><span class="legend-dot" style="background:#5C8A3A;"></span><span data-i18n="legend_donate">Donation</span></div>
+    <div class="legend-item"><span class="legend-dot" style="background:#C77B2E;"></span><span data-i18n="legend_upcycle">Upcycling</span></div>
+    <div class="legend-item"><span class="legend-dot" style="background:#A34B6F;"></span><span data-i18n="legend_repair">Repairs</span></div>
+  </div>
+</section>
+
+<section class="grid-wrap" id="gridSection">
+  <div class="grid" id="grid"></div>
+</section>
+
+<section class="teaser">
+  <div class="teaser-inner">
+    <div>
+      <div class="teaser-title" data-i18n="teaser_about_title">About this map</div>
+      <p class="teaser-text" data-i18n="teaser_about_text">Refashion BXL is a collaborative, interactive map to repair, donate, upcycle and buy second-hand clothes in your own neighbourhood.</p>
+    </div>
+    <button class="btn-ghost" onclick="location.href='about.html'" data-i18n="teaser_about_btn">Learn more</button>
+  </div>
+</section>
+
+<section class="teaser">
+  <div class="teaser-inner">
+    <div>
+      <div class="teaser-title" data-i18n="teaser_add_title">Add a place</div>
+      <p class="teaser-text" data-i18n="teaser_add_text">Know a circular-fashion place that should be on the map? Share the details with us.</p>
+    </div>
+    <button class="btn-primary" onclick="location.href='contribute.html'" data-i18n="teaser_add_btn">Add a place</button>
+  </div>
+</section>
+
+<section class="teaser">
+  <div class="teaser-inner">
+    <div>
+      <div class="teaser-title" data-i18n="teaser_my_title">My Refashion BXL</div>
+      <p class="teaser-text" data-i18n="teaser_my_text">Log in or create a free account to save your favourite places and view your profile.</p>
+    </div>
+    <button class="btn-ghost" onclick="location.href='my-refashion.html'" data-i18n="teaser_my_btn">My Refashion BXL</button>
+  </div>
+</section>
+
+<section class="contact">
+  <div class="contact-box">
+    <div class="contact-title" data-i18n="contact_title">Have something in mind?</div>
+    <p class="contact-text" data-i18n="contact_text">
+      Whether it's a question, an idea, feedback or a suggestion to make Refashion BXL better, I'd love to hear
+      from you. Drop me a message at <a href="mailto:refashionbxl@gmail.com">refashionbxl@gmail.com</a>
+      and let's keep improving the loop together.
+    </p>
+  </div>
+</section>
+
+<footer>
+  <span>Refashion BXL — Brussels, 2026</span>
+  <div class="footer-links">
+    <a href="about.html" data-i18n="nav_about">About</a>
+    <a href="contribute.html" data-i18n="nav_add">Add a place</a>
+    <a href="my-refashion.html">My Refashion BXL</a>
+  </div>
+</footer>
+
+<div class="modal-overlay" id="lockedModal">
+  <div class="modal-card">
+    <button class="modal-close" data-close>&times;</button>
+    <div class="modal-eyebrow" data-i18n="locked_eyebrow">Members only</div>
+    <div class="modal-title" data-i18n="locked_title">Log in or create your account</div>
+    <p class="modal-text" data-i18n="locked_text">Log in or create your free Refashion BXL account to view full place details, get directions and save your favourite spots.</p>
+    <div class="modal-btns">
+      <button class="btn-ghost" id="lockedLogin" data-i18n="locked_login">Log in</button>
+      <button class="btn-primary" id="lockedCreate" data-i18n="locked_create">Create an account</button>
+      <button class="btn-ghost" data-close style="border-color:var(--line);color:var(--ink-soft);" data-i18n="locked_close">Close</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="detailModal">
+  <div class="modal-card">
+    <button class="modal-close" data-close>&times;</button>
+    <div class="modal-eyebrow" id="detailCat">Category</div>
+    <div class="modal-title" id="detailName">Place name</div>
+    <div id="detailBody"></div>
+    <div class="modal-btns" style="margin-top:16px;">
+      <button class="btn-primary" id="detailDirections" data-i18n="detail_directions">Get directions</button>
+      <button class="btn-ghost" id="detailFav" data-i18n="detail_fav">Save to favourites</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="signupModal">
+  <div class="modal-card">
+    <button class="modal-close" data-close>&times;</button>
+    <div class="modal-eyebrow" data-i18n="signup_eyebrow">Join Refashion BXL</div>
+    <div class="modal-title" data-i18n="signup_title">Create your free account</div>
+    <div class="modal-field"><label data-i18n="field_username">Username</label><input type="text" id="signupUsername"><div class="field-error" id="err-signupUsername" data-i18n="err_username">Please enter a username.</div></div>
+    <div class="modal-field"><label data-i18n="field_email">Email address</label><input type="email" id="signupEmail"><div class="field-error" id="err-signupEmail" data-i18n="err_email">Please enter a valid email address.</div></div>
+    <div class="modal-field"><label data-i18n="field_password">Password</label><input type="password" id="signupPassword"><button type="button" class="pw-toggle" data-toggle="signupPassword" data-i18n="pw_show">SHOW</button><div class="field-error" id="err-signupPassword" data-i18n="err_password">Password cannot be empty.</div></div>
+    <div class="modal-field"><label data-i18n="field_confirm">Confirm password</label><input type="password" id="signupConfirm"><button type="button" class="pw-toggle" data-toggle="signupConfirm" data-i18n="pw_show">SHOW</button><div class="field-error" id="err-signupConfirm" data-i18n="err_confirm">Passwords do not match.</div></div>
+    <div class="modal-field">
+      <label data-i18n="field_commune">Your Brussels commune</label>
+      <select id="signupCommune"></select>
+    </div>
+    <div class="checkbox-row"><input type="checkbox" id="signupTerms"><label for="signupTerms" data-i18n="terms_label">I accept the Privacy Policy and Terms and Conditions.</label></div>
+    <div class="field-error" id="err-signupTerms" style="margin-bottom:10px;" data-i18n="err_terms">You must accept the Privacy Policy and Terms and Conditions.</div>
+    <button class="btn-primary" id="signupSubmit" style="width:100%;" data-i18n="signup_submit">Create account</button>
+    <div class="modal-link-row"><span data-i18n="already_account">Already have an account?</span> <a id="toLogin" data-i18n="locked_login">Log in</a></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="loginModal">
+  <div class="modal-card">
+    <button class="modal-close" data-close>&times;</button>
+    <div class="modal-eyebrow" data-i18n="login_eyebrow">Welcome back</div>
+    <div class="modal-title" data-i18n="login_title">Log in to Refashion BXL</div>
+    <div class="modal-field"><label data-i18n="field_email">Email address</label><input type="email" id="loginEmail"><div class="field-error" id="err-loginEmail" data-i18n="err_email">Please enter a valid email address.</div></div>
+    <div class="modal-field"><label data-i18n="field_password">Password</label><input type="password" id="loginPassword"><button type="button" class="pw-toggle" data-toggle="loginPassword" data-i18n="pw_show">SHOW</button><div class="field-error" id="err-loginPassword" data-i18n="err_password">Password cannot be empty.</div></div>
+    <div style="text-align:right;margin-bottom:16px;"><a href="#" id="forgotLink" data-i18n="forgot_password" style="font-size:12.5px;color:var(--ink-soft);">Forgot your password?</a></div>
+    <div class="field-error" id="err-loginNotFound" style="margin-bottom:10px;" data-i18n="err_notfound">No account found with this email — create one instead?</div>
+    <button class="btn-primary" id="loginSubmit" style="width:100%;" data-i18n="login_submit">Log in</button>
+    <div class="modal-link-row"><span data-i18n="new_to_site">New to Refashion BXL?</span> <a id="toSignup" data-i18n="locked_create">Create an account</a></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="script.js"></script>
+<script>
+/* ================= PAGE-SPECIFIC: LANDING ================= */
+
+document.getElementById('neighFilter').insertAdjacentHTML('beforeend',
+  BRUSSELS_COMMUNES.map(c => `<option>${c}</option>`).join(''));
+document.getElementById('signupCommune').innerHTML =
+  BRUSSELS_COMMUNES.map(c => `<option>${c}</option>`).join('');
+
+let activeCat = 'all', activeNeigh = 'all', searchTerm = '';
+
+function getFiltered(){
+  return PLACES.filter(p =>
+    (activeCat === 'all' || p.cat === activeCat) &&
+    (activeNeigh === 'all' || p.neigh === activeNeigh) &&
+    (searchTerm === '' || p.name.toLowerCase().includes(searchTerm))
+  );
+}
+
+function applyLang(){
+  const dict = pageDict(STRINGS_LANDING);
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (dict[key] !== undefined) el.textContent = dict[key];
+  });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    const key = el.getAttribute('data-i18n-placeholder');
+    if (dict[key] !== undefined) el.placeholder = dict[key];
+  });
+  document.querySelectorAll('#neighFilter option[value="all"]').forEach(o => o.textContent = dict.neigh_all);
+  renderGrid();
+}
+
+function renderGrid(){
+  const grid = document.getElementById('grid');
+  const favs = getFavourites();
+  const dict = pageDict(STRINGS_LANDING);
+  grid.innerHTML = getFiltered().map(p => `
+    <div class="card" data-id="${p.id}">
+      <button class="fav-btn ${favs.includes(p.id) ? 'saved' : ''}" data-fav="${p.id}">${iconHeart()}</button>
+      <div class="cat-badge ${p.cat}">${dict['chip_'+p.cat]}</div>
+      <div class="card-name">${p.name}</div>
+      <div class="card-neigh">${p.neigh}</div>
+      <div class="card-links">
+        ${p.instagram ? `<a class="icon-link" href="${p.instagram}" target="_blank" rel="noopener" onclick="event.stopPropagation()">${iconInstagram()}</a>` : `<span></span>`}
+        <button class="view-details" data-view="${p.id}">${dict.view_details}</button>
+      </div>
+    </div>
+  `).join('');
+  grid.querySelectorAll('.fav-btn').forEach(btn => btn.addEventListener('click', (e) => { e.stopPropagation(); handleFavClick(btn.getAttribute('data-fav'), btn); }));
+  grid.querySelectorAll('.view-details').forEach(btn => btn.addEventListener('click', (e) => { e.stopPropagation(); openPlace(btn.getAttribute('data-view')); }));
+  grid.querySelectorAll('.card').forEach(card => card.addEventListener('click', () => openPlace(card.getAttribute('data-id'))));
+}
+function handleFavClick(id, btnEl){
+  if (!isLoggedIn()){ track('locked_feature_click', {feature:'favourite', place_id:id}); openModal('lockedModal'); return; }
+  const nowSaved = toggleFavourite(id);
+  if (btnEl) btnEl.classList.toggle('saved', nowSaved);
+  showToast(nowSaved ? pageDict(STRINGS_LANDING).toast_saved : pageDict(STRINGS_LANDING).toast_removed);
+}
+
+/* MAP */
+const DEFAULT_CENTER = [50.842, 4.360], DEFAULT_ZOOM = 13;
+const map = L.map('map', {scrollWheelZoom:false}).setView(DEFAULT_CENTER, DEFAULT_ZOOM);
+L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+  attribution:'&copy; OpenStreetMap &copy; CARTO', maxZoom:19
+}).addTo(map);
+let markers = [];
+function renderMarkers(){
+  markers.forEach(m => map.removeLayer(m));
+  markers = [];
+  getFiltered().forEach(p => {
+    const m = L.circleMarker([p.lat, p.lng], {
+      radius: 8, color: '#fff', weight: 2, fillColor: MARKER_COLOR[p.cat], fillOpacity: 1
+    }).addTo(map);
+    m.bindPopup(`<strong>${p.name}</strong><br><span style="font-size:12px;color:#666;">${p.neigh}</span>`);
+    m.on('click', () => openPlace(p.id));
+    markers.push(m);
+  });
+}
+
+let currentPlace = null;
+function openPlace(id){
+  currentPlace = PLACES.find(p => p.id === id);
+  track('place_click', {place_id:id, logged_in:isLoggedIn()});
+  if (!isLoggedIn()){ openModal('lockedModal'); return; }
+  const dict = pageDict(STRINGS_LANDING);
+  const favs = getFavourites();
+  document.getElementById('detailCat').textContent = dict['chip_'+currentPlace.cat];
+  document.getElementById('detailName').textContent = currentPlace.name;
+  document.getElementById('detailBody').innerHTML = `
+    <div class="detail-row"><strong>Commune</strong>${currentPlace.neigh}</div>
+    <div class="detail-row"><strong>Address</strong>${currentPlace.addr}</div>
+    <div class="detail-row"><strong>Hours</strong>${currentPlace.hours || dict.hours_soon}</div>
+    ${currentPlace.website ? `<div class="detail-row"><strong>Website</strong><a href="${currentPlace.website}" target="_blank">${currentPlace.website}</a></div>` : ''}
+  `;
+  document.getElementById('detailFav').textContent = favs.includes(id) ? dict.detail_unfav : dict.detail_fav;
+  openModal('detailModal');
+}
+document.getElementById('detailDirections').addEventListener('click', () => {
+  if (!currentPlace) return;
+  track('get_directions', {place_id:currentPlace.id});
+  window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(currentPlace.addr)}`, '_blank');
+});
+document.getElementById('detailFav').addEventListener('click', () => {
+  if (!currentPlace) return;
+  const nowSaved = toggleFavourite(currentPlace.id);
+  const dict = pageDict(STRINGS_LANDING);
+  document.getElementById('detailFav').textContent = nowSaved ? dict.detail_unfav : dict.detail_fav;
+  showToast(nowSaved ? dict.toast_saved : dict.toast_removed);
+  renderGrid();
+});
+
+wireModalCloseHandlers();
+document.getElementById('lockedCreate').addEventListener('click', () => { closeModal('lockedModal'); openModal('signupModal'); });
+document.getElementById('lockedLogin').addEventListener('click', () => { closeModal('lockedModal'); openModal('loginModal'); });
+document.getElementById('toLogin').addEventListener('click', () => { closeModal('signupModal'); openModal('loginModal'); });
+document.getElementById('toSignup').addEventListener('click', () => { closeModal('loginModal'); openModal('signupModal'); });
+document.getElementById('forgotLink').addEventListener('click', (e) => { e.preventDefault(); alert('Password reset requires a secure back end — not available in this prototype.'); });
+document.getElementById('browseMapBtn').addEventListener('click', () => document.getElementById('mapSection').scrollIntoView({behavior:'smooth'}));
+wirePasswordToggles(() => pageDict(STRINGS_LANDING));
+
+document.getElementById('signupSubmit').addEventListener('click', () => {
+  const username = document.getElementById('signupUsername').value.trim();
+  const email = document.getElementById('signupEmail').value.trim();
+  const pw = document.getElementById('signupPassword').value;
+  const confirm = document.getElementById('signupConfirm').value;
+  const commune = document.getElementById('signupCommune').value;
+  const terms = document.getElementById('signupTerms').checked;
+  let valid = true;
+  if (!username){ setError('signupUsername', true); valid=false; } else setError('signupUsername', false);
+  if (!isValidEmail(email)){ setError('signupEmail', true); valid=false; } else setError('signupEmail', false);
+  if (!pw){ setError('signupPassword', true); valid=false; } else setError('signupPassword', false);
+  if (!confirm || confirm !== pw){ setError('signupConfirm', true); valid=false; } else setError('signupConfirm', false);
+  if (!terms){ setError('signupTerms', true); valid=false; } else setError('signupTerms', false);
+  if (!valid) return;
+  saveUser({username, email, commune});
+  track('sign_up', {email});
+  closeModal('signupModal');
+  refreshAccountArea();
+  showToast(pageDict(STRINGS_LANDING).toast_created);
+});
+document.getElementById('loginSubmit').addEventListener('click', () => {
+  const email = document.getElementById('loginEmail').value.trim();
+  const pw = document.getElementById('loginPassword').value;
+  let valid = true;
+  if (!isValidEmail(email)){ setError('loginEmail', true); valid=false; } else setError('loginEmail', false);
+  if (!pw){ setError('loginPassword', true); valid=false; } else setError('loginPassword', false);
+  document.getElementById('err-loginNotFound').classList.remove('show');
+  if (!valid) return;
+  const existing = getUser();
+  if (existing && existing.email === email){
+    track('login', {email});
+    closeModal('loginModal');
+    refreshAccountArea();
+    showToast(pageDict(STRINGS_LANDING).toast_loggedin);
+  } else {
+    document.getElementById('err-loginNotFound').classList.add('show');
+  }
+});
+
+function setLang(lang){ localStorage.setItem('refashion_lang', lang); applyLang(); refreshAccountArea(); }
+function renderLangSelect(container){
+  const sel = document.createElement('select');
+  sel.id = 'langSelect';
+  sel.innerHTML = `<option value="en">EN</option><option value="fr">FR</option><option value="nl">NL</option>`;
+  sel.value = getLang();
+  sel.addEventListener('change', (e) => setLang(e.target.value));
+  container.appendChild(sel);
+}
+function refreshAccountArea(){
+  const area = document.getElementById('accountArea');
+  const dict = pageDict(STRINGS_LANDING);
+  area.innerHTML = '';
+  renderLangSelect(area);
+  const btn = document.createElement('button');
+  if (isLoggedIn()){
+    btn.className = 'btn-signup-nav';
+    btn.textContent = dict.nav_account;
+    btn.addEventListener('click', () => location.href = 'my-refashion.html');
+  } else {
+    btn.className = 'btn-login-nav';
+    btn.textContent = dict.nav_login;
+    btn.addEventListener('click', () => openModal('loginModal'));
+  }
+  area.appendChild(btn);
+}
+
+document.querySelectorAll('.chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+    activeCat = chip.getAttribute('data-cat');
+    track('filter_category', {category:activeCat});
+    renderGrid(); renderMarkers();
+  });
+});
+document.getElementById('neighFilter').addEventListener('change', (e) => {
+  activeNeigh = e.target.value;
+  track('filter_neighbourhood', {neighbourhood:activeNeigh});
+  renderGrid(); renderMarkers();
+});
+document.getElementById('searchInput').addEventListener('input', (e) => {
+  searchTerm = e.target.value.trim().toLowerCase();
+  track('search', {term:searchTerm});
+  renderGrid(); renderMarkers();
+});
+
+applyLang();
+refreshAccountArea();
+renderMarkers();
+track('page_view', {page:'home'});
+</script>
+
+</body>
+</html>
