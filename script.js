@@ -46,6 +46,24 @@ const PLACES = [
   {id:'p18', cat:'repair', name:"Gold Fingers Abdel", neigh:"Bruxelles (Ville de Bruxelles)", addr:"Rue de la Bonté 2, 1000 Bruxelles", hours:null, instagram:null, website:null, lat:50.8316, lng:4.3588}
 ];
 const MARKER_COLOR = {second:'#3E7CB1', donate:'#5C8A3A', upcycle:'#C77B2E', repair:'#A34B6F'};
+/* ---------- SUPABASE (real backend) ---------- */
+const SUPABASE_URL = 'https://taimxnyiapwdwsgoxcat.supabase.co';
+const SUPABASE_ANON_KEY = sb_publishable_9gp_15goY-jRSPvMylJaGQ_L-8YlXEf
+
+let _supabaseClient = null;
+function getSupabase(){
+  if (SUPABASE_URL.includes('YOUR_PROJECT') || !window.supabase) return null;
+  if (!_supabaseClient) _supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  return _supabaseClient;
+}
+
+async function fetchApprovedPlaces(){
+  const sb = getSupabase();
+  if (!sb) return [];
+  const { data, error } = await sb.from('places').select('*');
+  if (error){ console.error('[supabase]', error); return []; }
+  return data || [];
+}
 const BRUSSELS_COMMUNES = [
   'Anderlecht','Auderghem','Berchem-Sainte-Agathe','Bruxelles (Ville de Bruxelles)','Etterbeek','Evere',
   'Forest','Ganshoren','Ixelles','Jette','Koekelberg','Molenbeek-Saint-Jean','Saint-Gilles',
