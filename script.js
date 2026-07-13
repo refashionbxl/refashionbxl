@@ -48,7 +48,7 @@ const PLACES = [
 const MARKER_COLOR = {second:'#3E7CB1', donate:'#5C8A3A', upcycle:'#C77B2E', repair:'#A34B6F'};
 /* ---------- SUPABASE (real backend) ---------- */
 const SUPABASE_URL = 'https://taimxnyiapwdwsgoxcat.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRhaW14bnlpYXB3ZHdzZ294Y2F0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM4MzQ1MzksImV4cCI6MjA5OTQxMDUzOX0.dj4aYF63XPrtZH7Ek_MayRQ0LX8jwtp0jxaH7wnHygM;
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRhaW14bnlpYXB3ZHdzZ294Y2F0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM4MzQ1MzksImV4cCI6MjA5OTQxMDUzOX0.dj4aYF63XPrtZH7Ek_MayRQ0LX8jwtp0jxaH7wnHygM';
 
 let _supabaseClient = null;
 function getSupabase(){
