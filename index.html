@@ -181,6 +181,7 @@
 <div class="toast" id="toast"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <script src="script.js"></script>
 <script>
 /* ================= PAGE-SPECIFIC: LANDING ================= */
@@ -392,6 +393,19 @@ applyLang();
 refreshAccountArea();
 renderMarkers();
 track('page_view', {page:'home'});
+
+/* Pull in any places approved via admin.html and merge them into the
+   existing built-in list, then redraw. If Supabase isn't configured yet,
+   fetchApprovedPlaces() just returns an empty list — nothing breaks. */
+fetchApprovedPlaces().then(approved => {
+  if (!approved.length) return;
+  approved.forEach(p => {
+    if (PLACES.some(existing => existing.id === p.id)) return; // avoid duplicates on refresh
+    PLACES.push({id:p.id, cat:p.cat, name:p.name, neigh:p.neigh, addr:p.addr, hours:p.hours, instagram:p.instagram, website:p.website, lat:p.lat, lng:p.lng});
+  });
+  renderGrid();
+  renderMarkers();
+});
 </script>
 
 </body>
