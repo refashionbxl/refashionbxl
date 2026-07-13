@@ -48,7 +48,7 @@ const PLACES = [
 const MARKER_COLOR = {second:'#3E7CB1', donate:'#5C8A3A', upcycle:'#C77B2E', repair:'#A34B6F'};
 /* ---------- SUPABASE (real backend) ---------- */
 const SUPABASE_URL = 'https://taimxnyiapwdwsgoxcat.supabase.co';
-const SUPABASE_ANON_KEY = sb_publishable_9gp_15goY-jRSPvMylJaGQ_L-8YlXEf
+const SUPABASE_ANON_KEY = 'sb_publishable_9gp_15goY-jRSPvMylJaGQ_L-8YlXEf';
 
 let _supabaseClient = null;
 function getSupabase(){
