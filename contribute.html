@@ -34,12 +34,13 @@
   <p class="info-note" data-i18n="contrib_info">Every suggestion is reviewed before being added to the Refashion BXL map.</p>
 
   <form id="contribForm">
-    <div class="field"><label data-i18n="contrib_place_name">Name of the place</label><input type="text" id="pName" required></div>
+    <input type="hidden" name="_subject" value="New Refashion BXL place suggestion">
+    <div class="field"><label data-i18n="contrib_place_name">Name of the place</label><input type="text" id="pName" name="Place name" required></div>
 
     <div class="row2">
       <div class="field">
         <label data-i18n="contrib_category">Category</label>
-        <select id="pCategory">
+        <select id="pCategory" name="Category">
           <option value="repair" data-i18n="cat_repair">Repairs</option>
           <option value="second" data-i18n="cat_second">Second-hand</option>
           <option value="donate" data-i18n="cat_donate">Donation</option>
@@ -48,24 +49,24 @@
       </div>
       <div class="field">
         <label data-i18n="field_commune">Brussels neighbourhood or commune</label>
-        <select id="pCommune"></select>
+        <select id="pCommune" name="Commune"></select>
       </div>
     </div>
 
-    <div class="field"><label data-i18n="field_address">Address</label><input type="text" id="pAddress" required></div>
-    <div class="field"><label data-i18n="field_email">Contributor email address</label><input type="email" id="cEmail" required></div>
+    <div class="field"><label data-i18n="field_address">Address</label><input type="text" id="pAddress" name="Address" required></div>
+    <div class="field"><label data-i18n="field_email">Contributor email address</label><input type="email" id="cEmail" name="Contributor email" required></div>
 
     <div class="field">
       <label><span data-i18n="field_instagram">Instagram link</span> <span class="optional-tag" data-i18n="contrib_optional">(Optional)</span></label>
-      <input type="text" id="pInstagram" placeholder="https://instagram.com/...">
+      <input type="text" id="pInstagram" name="Instagram" placeholder="https://instagram.com/...">
     </div>
     <div class="field">
       <label><span data-i18n="field_website">Website</span> <span class="optional-tag" data-i18n="contrib_optional">(Optional)</span></label>
-      <input type="text" id="pWebsite" placeholder="https://">
+      <input type="text" id="pWebsite" name="Website" placeholder="https://">
     </div>
     <div class="field">
       <label><span data-i18n="field_description">Short description</span> <span class="optional-tag" data-i18n="contrib_optional">(Optional)</span></label>
-      <textarea id="pDescription"></textarea>
+      <textarea id="pDescription" name="Description"></textarea>
     </div>
 
     <button type="submit" class="btn-primary" data-i18n="contrib_submit">Send for review</button>
@@ -82,12 +83,18 @@
   <span>Brussels, 2026</span>
 </footer>
 
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <script src="script.js"></script>
 <script>
 /* ================= PAGE-SPECIFIC: ADD A PLACE ================= */
 
 document.getElementById('pCommune').innerHTML =
   BRUSSELS_COMMUNES.map(c => `<option>${c}</option>`).join('');
+
+/* Optional: an instant email ping in parallel to the real Supabase
+   backend. Get this URL from formspree.io if you want it; leave the
+   placeholder as-is to skip this and rely on admin.html only. */
+const FORMSPREE_ENDPOINT = 'https://formspree.io/f/YOUR_FORM_ID';
 
 function applyLang(){
   const dict = pageDict(STRINGS_CONTRIBUTE);
@@ -108,14 +115,16 @@ document.getElementById('navLoginBtn').addEventListener('click', () => {
 applyLang();
 track('page_view', {page:'contribute'});
 
-/* Stored in localStorage for now — this is a placeholder for a real backend
-   + moderation queue. Submissions are never shown publicly or added to the
-   map automatically; each one is namespaced under 'refashion_submissions'
-   with status 'pending_review'. */
-document.getElementById('contribForm').addEventListener('submit', function(e){
+/* Saved three ways: to Supabase (the real backend you manage from
+   admin.html), to localStorage (local backup / demo), and to Formspree
+   (an instant email ping). Submissions are never shown publicly or
+   added to the map automatically — only you, approving them in
+   admin.html, can do that. */
+document.getElementById('contribForm').addEventListener('submit', async function(e){
   e.preventDefault();
-  const submissions = JSON.parse(localStorage.getItem('refashion_submissions') || '[]');
-  submissions.push({
+  const form = document.getElementById('contribForm');
+
+  const entry = {
     placeName: document.getElementById('pName').value,
     category: document.getElementById('pCategory').value,
     commune: document.getElementById('pCommune').value,
@@ -126,11 +135,45 @@ document.getElementById('contribForm').addEventListener('submit', function(e){
     description: document.getElementById('pDescription').value,
     status: 'pending_review',
     submittedAt: Date.now()
-  });
+  };
+
+  // Local backup copy
+  const submissions = JSON.parse(localStorage.getItem('refashion_submissions') || '[]');
+  submissions.push(entry);
   localStorage.setItem('refashion_submissions', JSON.stringify(submissions));
-  track('contribution_submit', {category: document.getElementById('pCategory').value});
-  document.getElementById('contribForm').classList.add('hidden');
-  document.getElementById('thankyou').classList.add('show');
+  track('contribution_submit', {category: entry.category});
+
+  const showThanks = () => {
+    document.getElementById('contribForm').classList.add('hidden');
+    document.getElementById('thankyou').classList.add('show');
+  };
+
+  // Real backend: this is what admin.html reads from
+  const sb = getSupabase();
+  if (sb){
+    await sb.from('submissions').insert([{
+      place_name: entry.placeName,
+      category: entry.category,
+      commune: entry.commune,
+      address: entry.address,
+      contributor_email: entry.contributorEmail,
+      instagram: entry.instagram,
+      website: entry.website,
+      description: entry.description,
+      status: 'pending'
+    }]);
+  }
+
+  // Instant email notification (optional, in parallel)
+  if (!FORMSPREE_ENDPOINT.includes('YOUR_FORM_ID')){
+    fetch(FORMSPREE_ENDPOINT, {
+      method: 'POST',
+      headers: {'Accept': 'application/json'},
+      body: new FormData(form)
+    }).catch(() => {});
+  }
+
+  showThanks();
 });
 </script>
 
