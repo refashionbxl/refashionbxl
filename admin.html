@@ -19,6 +19,8 @@
   .page-admin .sub-card{background:var(--card);border-radius:14px;padding:20px 22px;margin-bottom:14px;box-shadow:0 2px 8px rgba(30,42,38,0.05);}
   .page-admin .sub-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;}
   .page-admin .sub-name{font-size:16px;font-weight:700;color:var(--teal-dark);}
+  .page-admin .status-badge{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;padding:4px 10px;border-radius:12px;}
+  .page-admin .status-badge.approved{background:#EBF2E3;color:var(--donate);}
   .page-admin .sub-meta{font-size:12.5px;color:var(--ink-soft);margin:4px 0;}
   .page-admin .sub-desc{font-size:13.5px;color:var(--ink);margin:8px 0;}
   .page-admin .sub-controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:10px;}
@@ -126,11 +128,14 @@ async function loadSubmissions(){
     list.innerHTML = `<div class="empty-note">No submissions yet.</div>`;
     return;
   }
+  const livePlaceIds = await fetchLivePlaceIds(); // e.g. ['crowd-abc123', ...]
+  const isLive = (s) => livePlaceIds.includes('crowd-' + s.id);
+
   list.innerHTML = data.map(s => `
     <div class="sub-card" data-id="${s.id}">
       <div class="sub-top">
         <div>
-          <div class="sub-name">${s.place_name}</div>
+          <div class="sub-name">${s.place_name} ${isLive(s) ? '<span class="status-badge approved" style="margin-left:8px;">🟢 Live on map</span>' : ''}</div>
           <div class="sub-meta">${CAT_LABEL[s.category] || s.category} · ${s.commune} · ${s.address}</div>
           <div class="sub-meta">Submitted by ${s.contributor_email} on ${new Date(s.submitted_at).toLocaleDateString()}</div>
           ${s.description ? `<p class="sub-desc">${s.description}</p>` : ''}
@@ -142,17 +147,18 @@ async function loadSubmissions(){
         </div>
       </div>
       <div class="sub-controls">
-        <select data-status="${s.id}">
+        <select data-status="${s.id}" ${isLive(s) ? 'disabled' : ''}>
           ${STATUS_OPTIONS.map(o => `<option value="${o.value}" ${o.value===s.status?'selected':''}>${o.label}</option>`).join('')}
         </select>
-        <button class="btn-ghost" data-save="${s.id}">Save status</button>
-        <button class="btn-primary" data-publish="${s.id}" ${s.status==='approved' ? '' : 'style="display:none;"'}>Publish to map</button>
+        <button class="btn-ghost" data-save="${s.id}" ${isLive(s) ? 'disabled' : ''}>Save status</button>
+        ${!isLive(s) ? `<button class="btn-primary" data-publish="${s.id}" ${s.status==='approved' ? '' : 'style="display:none;"'}>Publish to map</button>` : ''}
       </div>
+      ${!isLive(s) ? `
       <div class="latlng-row" data-latlng-row="${s.id}" style="${s.status==='approved' ? '' : 'display:none;'}">
         <input type="text" placeholder="Latitude" data-lat="${s.id}">
         <input type="text" placeholder="Longitude" data-lng="${s.id}">
         <span style="font-size:12px;color:var(--ink-soft);align-self:center;">Find these by right-clicking the spot on Google Maps</span>
-      </div>
+      </div>` : ''}
     </div>
   `).join('');
 
@@ -170,8 +176,10 @@ async function loadSubmissions(){
     sel.addEventListener('change', () => {
       const id = sel.getAttribute('data-status');
       const showExtra = sel.value === 'approved';
-      list.querySelector(`[data-publish="${id}"]`).style.display = showExtra ? 'inline-block' : 'none';
-      list.querySelector(`[data-latlng-row="${id}"]`).style.display = showExtra ? 'flex' : 'none';
+      const pubBtn = list.querySelector(`[data-publish="${id}"]`);
+      const latlngRow = list.querySelector(`[data-latlng-row="${id}"]`);
+      if (pubBtn) pubBtn.style.display = showExtra ? 'inline-block' : 'none';
+      if (latlngRow) latlngRow.style.display = showExtra ? 'flex' : 'none';
     });
   });
   list.querySelectorAll('[data-publish]').forEach(btn => {
@@ -196,6 +204,7 @@ async function loadSubmissions(){
       }]);
       if (error){ showToast('Error publishing: ' + error.message); return; }
       showToast('Published to the live map!');
+      loadSubmissions(); // re-render so this card now shows "Live on map"
     });
   });
 }
