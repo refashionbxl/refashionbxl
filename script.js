@@ -69,6 +69,24 @@ async function fetchApprovedPlaces(){
     return [];
   }
 }
+async function fetchLivePlaceIds(){
+  const places = await fetchApprovedPlaces();
+  return places.map(p => p.id);
+}
+
+async function fetchMySubmissions(email){
+  if (SUPABASE_URL.includes('YOUR_PROJECT') || !email) return [];
+  try {
+    const res = await fetch(
+      SUPABASE_URL + '/rest/v1/submissions?select=*&contributor_email=eq.' + encodeURIComponent(email),
+      { headers: { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + SUPABASE_ANON_KEY } }
+    );
+    if (!res.ok) return [];
+    return await res.json();
+  } catch (e) {
+    return [];
+  }
+}
 const BRUSSELS_COMMUNES = [
   'Anderlecht','Auderghem','Berchem-Sainte-Agathe','Bruxelles (Ville de Bruxelles)','Etterbeek','Evere',
   'Forest','Ganshoren','Ixelles','Jette','Koekelberg','Molenbeek-Saint-Jean','Saint-Gilles',
