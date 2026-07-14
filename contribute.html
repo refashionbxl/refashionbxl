@@ -148,20 +148,34 @@ document.getElementById('contribForm').addEventListener('submit', async function
     document.getElementById('thankyou').classList.add('show');
   };
 
-  // Real backend: this is what admin.html reads from
-  const sb = getSupabase();
-  if (sb){
-    await sb.from('submissions').insert([{
-      place_name: entry.placeName,
-      category: entry.category,
-      commune: entry.commune,
-      address: entry.address,
-      contributor_email: entry.contributorEmail,
-      instagram: entry.instagram,
-      website: entry.website,
-      description: entry.description,
-      status: 'pending'
-    }]);
+  // Real backend: this is what admin.html reads from.
+  // Uses a direct fetch() rather than the supabase-js client — see the
+  // note on fetchApprovedPlaces() in script.js for why.
+  if (!SUPABASE_URL.includes('YOUR_PROJECT')){
+    try {
+      await fetch(SUPABASE_URL + '/rest/v1/submissions', {
+        method: 'POST',
+        headers: {
+          apikey: SUPABASE_ANON_KEY,
+          Authorization: 'Bearer ' + SUPABASE_ANON_KEY,
+          'Content-Type': 'application/json',
+          Prefer: 'return=minimal'
+        },
+        body: JSON.stringify({
+          place_name: entry.placeName,
+          category: entry.category,
+          commune: entry.commune,
+          address: entry.address,
+          contributor_email: entry.contributorEmail,
+          instagram: entry.instagram,
+          website: entry.website,
+          description: entry.description,
+          status: 'pending'
+        })
+      });
+    } catch (e) {
+      console.error('[supabase] submission insert failed', e);
+    }
   }
 
   // Instant email notification (optional, in parallel)
