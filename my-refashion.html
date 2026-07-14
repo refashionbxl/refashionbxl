@@ -81,7 +81,7 @@ function statusLabel(dict, status){
   return {pending_review:dict.status_pending, approved:dict.status_approved, needs_info:dict.status_needs_info, rejected:dict.status_rejected}[status] || dict.status_pending;
 }
 
-function render(){
+async function render(){
   const dict = pageDict(STRINGS_MYREFASHION);
   document.getElementById('langSelect').value = getLang();
   document.querySelectorAll('.nav-links a[data-i18n]').forEach(el => el.textContent = dict[el.getAttribute('data-i18n')]);
@@ -111,11 +111,22 @@ function render(){
   const favIds = getFavourites();
   const favPlaces = PLACES.filter(p => favIds.includes(p.id));
 
-  /* Contributions: real submissions matched to this user's email, merged
-     with a couple of sample rows so every status badge can be shown. */
-  const realSubs = JSON.parse(localStorage.getItem('refashion_submissions') || '[]')
-    .filter(s => s.contributorEmail && s.contributorEmail === user.email);
+  /* Contributions: REAL submissions for this user, fetched live from
+     Supabase by email — so status changes made in admin.html show up
+     here too, not just a frozen snapshot from the moment of submission.
+     Merged with a couple of sample rows so every status badge can be
+     demonstrated even before you have real approved/rejected entries. */
+  const realSubsRaw = await fetchMySubmissions(user.email);
+  const realSubs = realSubsRaw.map(s => ({
+    id: s.id,
+    placeName: s.place_name,
+    category: s.category,
+    commune: s.commune,
+    submittedAt: new Date(s.submitted_at).getTime(),
+    status: s.status === 'pending' ? 'pending_review' : s.status // matches statusLabel() mapping below
+  }));
   const contributions = [...realSubs, ...SAMPLE_CONTRIBUTIONS];
+  const livePlaceIds = await fetchLivePlaceIds();
 
   const memberSince = user.memberSince ? new Date(user.memberSince).toLocaleDateString() : new Date().toLocaleDateString();
   const avatarSrc = user.avatar || 'data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2272%22 height=%2272%22><rect width=%22100%25%22 height=%22100%25%22 fill=%22%23E7E2D8%22/></svg>';
@@ -195,7 +206,7 @@ function render(){
         ${contributions.map(c => `
           <div class="history-row">
             <span>
-              <span class="hname">${c.placeName}</span><br>
+              <span class="hname">${c.placeName}</span> ${c.id && livePlaceIds.includes('crowd-'+c.id) ? '<span class="status-badge approved">🟢 Live</span>' : ''}<br>
               <span class="hmeta">${dict['cat_'+c.category] || c.category} · ${c.commune}</span>
             </span>
             <span style="text-align:right;">
