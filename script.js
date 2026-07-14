@@ -58,11 +58,16 @@ function getSupabase(){
 }
 
 async function fetchApprovedPlaces(){
-  const sb = getSupabase();
-  if (!sb) return [];
-  const { data, error } = await sb.from('places').select('*');
-  if (error){ console.error('[supabase]', error); return []; }
-  return data || [];
+  if (SUPABASE_URL.includes('YOUR_PROJECT')) return [];
+  try {
+    const res = await fetch(SUPABASE_URL + '/rest/v1/places?select=*', {
+      headers: { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + SUPABASE_ANON_KEY }
+    });
+    if (!res.ok) return [];
+    return await res.json();
+  } catch (e) {
+    return [];
+  }
 }
 const BRUSSELS_COMMUNES = [
   'Anderlecht','Auderghem','Berchem-Sainte-Agathe','Bruxelles (Ville de Bruxelles)','Etterbeek','Evere',
