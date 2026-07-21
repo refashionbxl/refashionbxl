@@ -152,6 +152,7 @@ async function render(){
         <div class="profile-main">
           <div class="profile-name">${user.name || ''}</div>
           <div class="profile-meta">${user.commune || ''} · ${dict.member_since} ${memberSince}</div>
+          <div class="profile-meta">${user.email || ''}</div>
           ${user.bio ? `<p class="profile-bio">${user.bio}</p>` : ''}
         </div>
         <button class="btn-ghost profile-edit-btn" id="editProfileBtn">${dict.edit_profile}</button>
