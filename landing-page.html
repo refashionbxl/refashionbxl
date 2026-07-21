@@ -221,7 +221,7 @@ function renderGrid(){
   const dict = pageDict(STRINGS_LANDING);
   grid.innerHTML = getFiltered().map(p => `
     <div class="card" data-id="${p.id}">
-      <button class="fav-btn ${favs.includes(p.id) ? 'saved' : ''}" data-fav="${p.id}">${iconHeart(favs.includes(p.id)}</button>
+      <button class="fav-btn ${favs.includes(p.id) ? 'saved' : ''}" data-fav="${p.id}">${iconHeart(favs.includes(p.id))}</button>
       <div class="cat-badge ${p.cat}">${dict['chip_'+p.cat]}</div>
       <div class="card-name">${p.name}</div>
       <div class="card-neigh">${p.neigh}</div>
