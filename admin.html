@@ -26,6 +26,8 @@
   .page-admin .sub-controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:10px;}
   .page-admin .latlng-row{display:flex;gap:8px;margin-top:8px;}
   .page-admin .latlng-row input{width:110px;padding:8px 10px;border-radius:8px;border:1px solid var(--line);font-size:13px;}
+  .page-admin .direct-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 16px;margin-bottom:4px;}
+  @media (max-width:640px){ .page-admin .direct-grid{grid-template-columns:1fr;} }
   .page-admin .empty-note{font-size:13.5px;color:var(--ink-soft);background:var(--card);border-radius:12px;padding:18px 20px;}
   .page-admin .error-text{color:var(--coral);font-size:13px;margin-top:8px;display:none;}
   .page-admin .error-text.show{display:block;}
@@ -52,6 +54,34 @@
 
   <div id="dashboard" style="display:none;">
     <div class="sub-row">
+      <h1 class="page-title" style="margin:0;">Add a place directly</h1>
+    </div>
+    <div class="sub-card" id="directAddCard">
+      <div class="direct-grid">
+        <div class="field"><label>Name</label><input type="text" id="directName"></div>
+        <div class="field">
+          <label>Category</label>
+          <select id="directCat">
+            <option value="second">Second-hand</option>
+            <option value="donate">Donation</option>
+            <option value="upcycle">Upcycling</option>
+            <option value="repair">Repairs</option>
+          </select>
+        </div>
+        <div class="field"><label>Commune</label><select id="directCommune"></select></div>
+        <div class="field"><label>Address</label><input type="text" id="directAddr"></div>
+        <div class="field"><label>Instagram (optional)</label><input type="text" id="directInsta" placeholder="https://instagram.com/…"></div>
+        <div class="field"><label>Website (optional)</label><input type="text" id="directWebsite" placeholder="https://…"></div>
+        <div class="field"><label>Latitude</label><input type="text" id="directLat"></div>
+        <div class="field"><label>Longitude</label><input type="text" id="directLng"></div>
+      </div>
+      <p style="font-size:12px;color:var(--ink-soft);margin:2px 0 14px;">Find latitude/longitude by right-clicking the spot on Google Maps and copying the numbers at the top of the menu.</p>
+      <button class="btn-primary" id="directAddBtn">Add to live map</button>
+      <p class="error-text" id="directError">Please fill in name, address, commune, category and valid coordinates.</p>
+    </div>
+    <div id="directList"></div>
+
+    <div class="sub-row" style="margin-top:36px;">
       <h1 class="page-title" style="margin:0;">Submissions</h1>
       <button class="btn-ghost" id="adminLogoutBtn">Log out</button>
     </div>
@@ -85,6 +115,7 @@ const STATUS_OPTIONS = [
   {value:'rejected', label:'Rejected'}
 ];
 const CAT_LABEL = {second:'Second-hand', donate:'Donation', upcycle:'Upcycling', repair:'Repairs'};
+document.getElementById('directCommune').innerHTML = BRUSSELS_COMMUNES.map(c => `<option>${c}</option>`).join('');
 
 async function checkSession(){
   if (!sb) return;
@@ -93,6 +124,7 @@ async function checkSession(){
     document.getElementById('loginCard').style.display = 'none';
     document.getElementById('dashboard').style.display = 'block';
     loadSubmissions();
+    loadDirectPlaces();
   }
 }
 
@@ -109,6 +141,7 @@ document.getElementById('adminLoginBtn').addEventListener('click', async () => {
   document.getElementById('loginCard').style.display = 'none';
   document.getElementById('dashboard').style.display = 'block';
   loadSubmissions();
+  loadDirectPlaces();
 });
 
 document.getElementById('adminLogoutBtn').addEventListener('click', async () => {
@@ -219,6 +252,73 @@ async function loadSubmissions(){
     });
   });
 }
+
+/* ================= DIRECT ADD (no submission/review needed) =================
+   Inserts straight into the `places` table — the same table that
+   "Publish to map" writes to from a submission. Uses a 'direct-' id
+   prefix so these can be told apart from crowd-sourced ones ('crowd-'
+   prefix) in the list below. */
+async function loadDirectPlaces(){
+  const places = await fetchApprovedPlaces();
+  const direct = places.filter(p => p.id && p.id.startsWith('direct-'));
+  const list = document.getElementById('directList');
+  if (!direct.length){ list.innerHTML = ''; return; }
+  list.innerHTML = `<h2 style="font-size:14px;color:var(--ink-soft);margin:18px 0 10px;">Places you've added directly</h2>` +
+    direct.map(p => `
+      <div class="sub-card" data-place="${p.id}" style="padding:14px 18px;margin-bottom:10px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
+          <div>
+            <div class="sub-name" style="font-size:14px;">${p.name}</div>
+            <div class="sub-meta">${CAT_LABEL[p.cat] || p.cat} · ${p.neigh} · ${p.addr}</div>
+          </div>
+          <button class="btn-ghost" data-delete-place="${p.id}" style="border-color:var(--coral);color:var(--coral);">Remove</button>
+        </div>
+      </div>
+    `).join('');
+  list.querySelectorAll('[data-delete-place]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const id = btn.getAttribute('data-delete-place');
+      if (!confirm('Remove this place from the live map? It will disappear for all visitors.')) return;
+      const { error } = await sb.from('places').delete().eq('id', id);
+      if (error){ showToast('Error removing: ' + error.message); return; }
+      showToast('Removed from the live map');
+      loadDirectPlaces();
+    });
+  });
+}
+
+document.getElementById('directAddBtn').addEventListener('click', async () => {
+  const name = document.getElementById('directName').value.trim();
+  const cat = document.getElementById('directCat').value;
+  const neigh = document.getElementById('directCommune').value;
+  const addr = document.getElementById('directAddr').value.trim();
+  const instagram = document.getElementById('directInsta').value.trim();
+  const website = document.getElementById('directWebsite').value.trim();
+  const lat = parseFloat(document.getElementById('directLat').value);
+  const lng = parseFloat(document.getElementById('directLng').value);
+  const err = document.getElementById('directError');
+
+  if (!name || !addr || !neigh || isNaN(lat) || isNaN(lng)){
+    err.classList.add('show');
+    return;
+  }
+  err.classList.remove('show');
+
+  const id = 'direct-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+  const { error } = await sb.from('places').insert([{
+    id, name, cat, neigh, addr,
+    instagram: instagram || null,
+    website: website || null,
+    lat, lng
+  }]);
+  if (error){ showToast('Error adding place: ' + error.message); return; }
+
+  showToast('Place added to the live map!');
+  ['directName','directAddr','directInsta','directWebsite','directLat','directLng'].forEach(fieldId => {
+    document.getElementById(fieldId).value = '';
+  });
+  loadDirectPlaces();
+});
 
 checkSession();
 </script>
