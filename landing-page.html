@@ -117,6 +117,24 @@
   </div>
 </footer>
 
+<div class="modal-overlay" id="welcomeModal">
+  <div class="modal-card">
+    <button class="modal-close" data-close>&times;</button>
+    <div class="modal-eyebrow" data-i18n="welcome_eyebrow">Welcome</div>
+    <div class="modal-title" data-i18n="welcome_title">Where do you live?</div>
+    <p class="modal-text" data-i18n="welcome_text">Pick your commune and we'll zoom the map to your neighbourhood.</p>
+    <div class="modal-field">
+      <select id="welcomeCommune">
+        <option value="" data-i18n="welcome_placeholder">Choose your commune…</option>
+      </select>
+    </div>
+    <div class="modal-btns">
+      <button class="btn-primary" id="welcomeConfirm" data-i18n="welcome_cta">Show my neighbourhood</button>
+      <button class="btn-ghost" id="welcomeSkip" data-i18n="welcome_skip">Skip, show all of Brussels</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="lockedModal">
   <div class="modal-card">
     <button class="modal-close" data-close>&times;</button>
@@ -190,6 +208,8 @@ document.getElementById('neighFilter').insertAdjacentHTML('beforeend',
   BRUSSELS_COMMUNES.map(c => `<option>${c}</option>`).join(''));
 document.getElementById('signupCommune').innerHTML =
   BRUSSELS_COMMUNES.map(c => `<option>${c}</option>`).join('');
+document.getElementById('welcomeCommune').insertAdjacentHTML('beforeend',
+  BRUSSELS_COMMUNES.map(c => `<option>${c}</option>`).join(''));
 
 let activeCat = 'all', activeNeigh = 'all', searchTerm = '';
 
@@ -394,6 +414,36 @@ applyLang();
 refreshAccountArea();
 renderMarkers();
 track('page_view', {page:'home'});
+
+/* ================= "WHERE DO YOU LIVE?" WELCOME MODAL =================
+   Shown once per browser (tracked via localStorage) so returning visitors
+   aren't asked again. Choosing a commune filters the grid to that commune
+   and zooms the map there; the existing "All communes" dropdown still lets
+   people change or clear this at any time afterwards. */
+document.getElementById('welcomeConfirm').addEventListener('click', () => {
+  const commune = document.getElementById('welcomeCommune').value;
+  localStorage.setItem('refashion_welcome_seen', '1');
+  if (commune){
+    activeNeigh = commune;
+    document.getElementById('neighFilter').value = commune;
+    renderGrid();
+    renderMarkers();
+    if (COMMUNE_CENTER[commune]) map.setView(COMMUNE_CENTER[commune], COMMUNE_ZOOM);
+    track('welcome_commune_selected', {commune});
+  } else {
+    track('welcome_commune_skipped', {});
+  }
+  closeModal('welcomeModal');
+  document.getElementById('mapSection').scrollIntoView({behavior:'smooth'});
+});
+document.getElementById('welcomeSkip').addEventListener('click', () => {
+  localStorage.setItem('refashion_welcome_seen', '1');
+  track('welcome_commune_skipped', {});
+  closeModal('welcomeModal');
+});
+if (!localStorage.getItem('refashion_welcome_seen')){
+  setTimeout(() => openModal('welcomeModal'), 400);
+}
 
 /* Pull in any places approved via admin.html and merge them into the
    existing built-in list, then redraw. If Supabase isn't configured yet,
