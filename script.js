@@ -92,6 +92,32 @@ const BRUSSELS_COMMUNES = [
   'Forest','Ganshoren','Ixelles','Jette','Koekelberg','Molenbeek-Saint-Jean','Saint-Gilles',
   'Saint-Josse-ten-Noode','Schaerbeek','Uccle','Watermael-Boitsfort','Woluwe-Saint-Lambert','Woluwe-Saint-Pierre'
 ];
+/* ---------- COMMUNE CENTER POINTS ----------
+   Approximate town-hall coordinates for each commune, used to zoom the
+   landing-page map to a user's neighbourhood (see COMMUNE_ZOOM below for
+   the zoom level used alongside these). */
+const COMMUNE_CENTER = {
+  'Anderlecht': [50.8333, 4.3086],
+  'Auderghem': [50.8144, 4.4128],
+  'Berchem-Sainte-Agathe': [50.8631, 4.2989],
+  'Bruxelles (Ville de Bruxelles)': [50.8503, 4.3517],
+  'Etterbeek': [50.8383, 4.3889],
+  'Evere': [50.8698, 4.4008],
+  'Forest': [50.8064, 4.3219],
+  'Ganshoren': [50.8677, 4.3175],
+  'Ixelles': [50.8336, 4.3670],
+  'Jette': [50.8778, 4.3255],
+  'Koekelberg': [50.8611, 4.3308],
+  'Molenbeek-Saint-Jean': [50.8554, 4.3277],
+  'Saint-Gilles': [50.8266, 4.3459],
+  'Saint-Josse-ten-Noode': [50.8578, 4.3701],
+  'Schaerbeek': [50.8676, 4.3738],
+  'Uccle': [50.8014, 4.3397],
+  'Watermael-Boitsfort': [50.8010, 4.4166],
+  'Woluwe-Saint-Lambert': [50.8467, 4.4247],
+  'Woluwe-Saint-Pierre': [50.8321, 4.4331]
+};
+const COMMUNE_ZOOM = 14;
 
 /* ---------- SAMPLE REVIEWS (prototype placeholder) ----------
    Hard-coded sample entries only, shown identically to every logged-in
@@ -173,7 +199,11 @@ const STRINGS_LANDING = {
     hours_soon:"Coming soon",
     teaser_about_title:"About this map", teaser_about_text:"Refashion BXL is a collaborative, interactive map to repair, donate, upcycle and buy second-hand clothes in your own neighbourhood.", teaser_about_btn:"Learn more",
     teaser_add_title:"Add a place", teaser_add_text:"Know a circular-fashion place that should be on the map? Share the details with us.", teaser_add_btn:"Add a place",
-    teaser_my_title:"My Refashion BXL", teaser_my_text:"Log in or create a free account to save your favourite places and view your profile.", teaser_my_btn:"My Refashion BXL"
+    teaser_my_title:"My Refashion BXL", teaser_my_text:"Log in or create a free account to save your favourite places and view your profile.", teaser_my_btn:"My Refashion BXL",
+    welcome_eyebrow:"Welcome", welcome_title:"Where do you live?",
+    welcome_text:"Pick your commune and we'll zoom the map to your neighbourhood.",
+    welcome_placeholder:"Choose your commune…",
+    welcome_cta:"Show my neighbourhood", welcome_skip:"Skip, show all of Brussels"
   },
   fr:{
     tagline:"Refashion BXL — votre guide circulaire à Bruxelles",
@@ -201,7 +231,11 @@ const STRINGS_LANDING = {
     hours_soon:"Bientôt disponible",
     teaser_about_title:"À propos de cette carte", teaser_about_text:"Refashion BXL est une carte collaborative et interactive pour réparer, donner, upcycler et acheter des vêtements de seconde main dans votre quartier.", teaser_about_btn:"En savoir plus",
     teaser_add_title:"Ajouter un lieu", teaser_add_text:"Vous connaissez un lieu de mode circulaire qui devrait figurer sur la carte ? Partagez les détails avec nous.", teaser_add_btn:"Ajouter un lieu",
-    teaser_my_title:"Mon Refashion BXL", teaser_my_text:"Connectez-vous ou créez un compte gratuit pour enregistrer vos lieux favoris et voir votre profil.", teaser_my_btn:"Mon Refashion BXL"
+    teaser_my_title:"Mon Refashion BXL", teaser_my_text:"Connectez-vous ou créez un compte gratuit pour enregistrer vos lieux favoris et voir votre profil.", teaser_my_btn:"Mon Refashion BXL",
+    welcome_eyebrow:"Bienvenue", welcome_title:"Où habitez-vous ?",
+    welcome_text:"Choisissez votre commune et nous centrerons la carte sur votre quartier.",
+    welcome_placeholder:"Choisissez votre commune…",
+    welcome_cta:"Afficher mon quartier", welcome_skip:"Passer, afficher tout Bruxelles"
   },
   nl:{
     tagline:"Refashion BXL — jouw circulaire gids voor Brussel",
@@ -229,7 +263,11 @@ const STRINGS_LANDING = {
     hours_soon:"Binnenkort beschikbaar",
     teaser_about_title:"Over deze kaart", teaser_about_text:"Refashion BXL is een collaboratieve, interactieve kaart om kleding te herstellen, doneren, upcyclen en tweedehands te kopen in je eigen buurt.", teaser_about_btn:"Meer weten",
     teaser_add_title:"Voeg een plek toe", teaser_add_text:"Ken je een circulaire-modeplek die op de kaart zou moeten staan? Deel de details met ons.", teaser_add_btn:"Voeg een plek toe",
-    teaser_my_title:"Mijn Refashion BXL", teaser_my_text:"Log in of maak een gratis account om je favoriete plekken op te slaan en je profiel te bekijken.", teaser_my_btn:"Mijn Refashion BXL"
+    teaser_my_title:"Mijn Refashion BXL", teaser_my_text:"Log in of maak een gratis account om je favoriete plekken op te slaan en je profiel te bekijken.", teaser_my_btn:"Mijn Refashion BXL",
+    welcome_eyebrow:"Welkom", welcome_title:"Waar woon je?",
+    welcome_text:"Kies je gemeente en we zoomen de kaart naar jouw buurt.",
+    welcome_placeholder:"Kies je gemeente…",
+    welcome_cta:"Toon mijn buurt", welcome_skip:"Overslaan, toon heel Brussel"
   }
 };
 
